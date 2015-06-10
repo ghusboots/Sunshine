@@ -1,5 +1,6 @@
 package me.danco.sunshine;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -11,8 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,9 +39,9 @@ import java.util.Locale;
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
-    @SuppressWarnings("unused")
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
+    private JSONObject forecasts;
     private ArrayAdapter<String> forecastAdapter;
 
     public ForecastFragment() {
@@ -68,39 +71,37 @@ public class ForecastFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        String[] forecastArray = {
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-                "Today - Sunny - 88/63",
-        };
-
-        ArrayList<String> forecasts = new ArrayList<>(Arrays.asList(forecastArray));
-        forecastAdapter = new ArrayAdapter<>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, forecasts);
+        forecastAdapter = new ArrayAdapter<>(getActivity(), R.layout.list_item_forecast, R.id.list_item_forecast_textview, new ArrayList<String>());
 
         View rootView = inflater.inflate(R.layout.fragment_forecast, container, false);
 
         ListView forecastList = (ListView)rootView.findViewById(R.id.listview_forecast);
         forecastList.setAdapter(forecastAdapter);
+        forecastList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    JSONArray forecastDays = forecasts.getJSONArray("list");
+                    Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+                    detailIntent.putExtra("Forecast", forecastDays.get(position).toString());
+                    detailIntent.putExtra("Position", position);
+                    startActivity(detailIntent);
+                } catch (JSONException ex) {
+                    Log.e(LOG_TAG, ex.toString());
+                }
+            }
+        });
+
+        new FetchWeatherTask().execute("98117");
 
         return rootView;
     }
 
-    private class FetchWeatherTask extends AsyncTask<String, Void, ArrayList<String>> {
+    private class FetchWeatherTask extends AsyncTask<String, Void, JSONObject> {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
-        protected ArrayList<String> doInBackground(String... args) {
-            ArrayList<String> forecasts = new ArrayList<>();
-
+        protected JSONObject doInBackground(String... args) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
@@ -147,31 +148,7 @@ public class ForecastFragment extends Fragment {
                 forecastJsonStr = buffer.toString();
 
                 try {
-                    JSONObject forecastData = new JSONObject(forecastJsonStr);
-                    JSONArray forecastList = forecastData.getJSONArray("list");
-
-
-                    SimpleDateFormat shortDateFormat = new SimpleDateFormat("EEE, MMM dd", Locale.US);
-
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(new Date());
-
-                    for (int i = 0; i < forecastList.length(); i++) {
-                        StringBuilder sb = new StringBuilder();
-                        JSONObject forecastDay = forecastList.getJSONObject(i);
-
-                        sb.append(shortDateFormat.format(c.getTime()));
-                        sb.append(" - ");
-                        sb.append(forecastDay.getJSONArray("weather").getJSONObject(0).getString("main"));
-                        sb.append(" - ");
-                        sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("max")));
-                        sb.append("/");
-                        sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("min")));
-
-                        c.add(Calendar.DATE, 1);
-
-                        forecasts.add(sb.toString());
-                    }
+                    return new JSONObject(forecastJsonStr);
                 } catch (JSONException ex) {
                     Log.e(LOG_TAG, "Error ", ex);
                 }
@@ -191,20 +168,44 @@ public class ForecastFragment extends Fragment {
                 }
             }
 
-            return forecasts;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> forecast) {
-            forecastAdapter.clear();
-            forecastAdapter.addAll(forecast);
+        protected void onPostExecute(JSONObject forecast) {
+            ArrayList<String> forecastList = new ArrayList<>();
+
+            try {
+                JSONArray forecastDays = forecast.getJSONArray("list");
+
+                SimpleDateFormat shortDateFormat = new SimpleDateFormat("EEE, MMM dd", Locale.US);
+
+                Calendar c = Calendar.getInstance();
+                c.setTime(new Date());
+
+                for (int i = 0; i < forecastDays.length(); i++) {
+                    StringBuilder sb = new StringBuilder();
+                    JSONObject forecastDay = forecastDays.getJSONObject(i);
+
+                    sb.append(shortDateFormat.format(c.getTime()));
+                    sb.append(" - ");
+                    sb.append(forecastDay.getJSONArray("weather").getJSONObject(0).getString("main"));
+                    sb.append(" - ");
+                    sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("max")));
+                    sb.append("/");
+                    sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("min")));
+
+                    c.add(Calendar.DATE, 1);
+
+                    forecastList.add(sb.toString());
+                }
+
+                forecastAdapter.clear();
+                forecastAdapter.addAll(forecastList);
+                forecasts = forecast;
+            } catch (JSONException ex) {
+                Log.e(LOG_TAG, ex.toString());
+            }
         }
     }
-
 }
-
-
-/*
-
-
- */

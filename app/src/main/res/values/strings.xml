@@ -3,4 +3,10 @@
     <string name="action_settings">Settings</string>
     <string name="app_name">Sunshine</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string formatted="false" name="format_temperature">%d°</string>
+    <string formatted="false" name="format_humidity">Humidity: %d %%</string>
+    <string formatted="false" name="format_pressure_metric">Pressure: %d hPa</string>
+    <string formatted="false" name="format_wind_metric">Wind: %d km/h %s</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>
