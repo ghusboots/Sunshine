@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:title="TEST PREFERENCES">
-        <CheckBoxPreference
-            android:key="checkbox_preference"
-            android:title="checkboxx"
-            android:summary="x because its exttra" />
+    <PreferenceCategory>
+        <EditTextPreference
+            android:title="@string/preference_location_title"
+            android:key="@string/preference_location_key"
+            android:defaultValue="@string/preference_location_default"
+            android:inputType="text"
+            android:singleLine="true" />
     </PreferenceCategory>
 </PreferenceScreen>

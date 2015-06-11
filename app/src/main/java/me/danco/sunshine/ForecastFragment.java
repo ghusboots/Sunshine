@@ -1,8 +1,11 @@
 package me.danco.sunshine;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -62,7 +65,7 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                new FetchWeatherTask().execute("98117");
+                refreshData();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -92,9 +95,20 @@ public class ForecastFragment extends Fragment {
             }
         });
 
-        new FetchWeatherTask().execute("98117");
-
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        refreshData();
+    }
+
+    private void refreshData () {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = settings.getString(getString(R.string.preference_location_key), getString(R.string.preference_location_default));
+        new FetchWeatherTask().execute(location);
+
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, JSONObject> {
