@@ -33,6 +33,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         super.onResume();
 
         bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_location_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_units_key)));
     }
 
     /**

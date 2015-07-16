@@ -7,10 +7,35 @@
     <string formatted="false" name="format_temperature">%d°</string>
     <string formatted="false" name="format_humidity">Humidity: %d %%</string>
     <string formatted="false" name="format_pressure_metric">Pressure: %d hPa</string>
+    <string formatted="false" name="format_pressure_imperial">Pressure: %d hPa</string>
     <string formatted="false" name="format_wind_metric">Wind: %d km/h %s</string>
+    <string formatted="false" name="format_wind_imperial">Wind: %d mph %s</string>
     <string name="title_activity_settings">Settings</string>
     <string name="preference_location_title">Location</string>
     <string name="preference_location_key" translatable="false">location</string>
     <string name="preference_location_default" translatable="false">94043</string>
-
+    <string formatted="false" name="format_forecast">%s %s - %s - %d/%d</string>
+    <string-array name="directions">
+        <item>N</item>
+        <item>NW</item>
+        <item>W</item>
+        <item>SW</item>
+        <item>S</item>
+        <item>SE</item>
+        <item>E</item>
+        <item>NE</item>
+    </string-array>
+    <string-array name="preference_units_options">
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
+    <string-array name="preference_units_options_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string name="preference_units_key">units</string>
+    <string name="preference_units_title">Units</string>
+    <string name="preference_units_default">0</string>
+    <string name="action_map">Show Map</string>
+    <string name="action_share">Share</string>
 </resources>

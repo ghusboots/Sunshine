@@ -1,6 +1,5 @@
 package me.danco.sunshine;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,10 +30,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import me.danco.sunshine.helpers.WeatherHelper;
 
 
 /**
@@ -43,6 +42,7 @@ import java.util.Locale;
  */
 public class ForecastFragment extends Fragment {
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private WeatherHelper weatherHelper;
 
     private JSONObject forecasts;
     private ArrayAdapter<String> forecastAdapter;
@@ -54,6 +54,8 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        weatherHelper = new WeatherHelper(getActivity());
+
     }
 
     @Override
@@ -87,6 +89,7 @@ public class ForecastFragment extends Fragment {
                     JSONArray forecastDays = forecasts.getJSONArray("list");
                     Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
                     detailIntent.putExtra("Forecast", forecastDays.get(position).toString());
+                    detailIntent.putExtra("ShortForecast", forecastAdapter.getItem(position));
                     detailIntent.putExtra("Position", position);
                     startActivity(detailIntent);
                 } catch (JSONException ex) {
@@ -205,9 +208,9 @@ public class ForecastFragment extends Fragment {
                     sb.append(" - ");
                     sb.append(forecastDay.getJSONArray("weather").getJSONObject(0).getString("main"));
                     sb.append(" - ");
-                    sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("max")));
+                    sb.append(weatherHelper.convertTemperature(forecastDay.getJSONObject("temp").getDouble("max")));
                     sb.append("/");
-                    sb.append(Math.round(forecastDay.getJSONObject("temp").getDouble("min")));
+                    sb.append(weatherHelper.convertTemperature(forecastDay.getJSONObject("temp").getDouble("min")));
 
                     c.add(Calendar.DATE, 1);
 

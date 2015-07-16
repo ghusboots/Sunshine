@@ -18,7 +18,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import me.danco.sunshine.helpers.Weather;
+import me.danco.sunshine.helpers.WeatherHelper;
 
 
 /**
@@ -27,12 +27,14 @@ import me.danco.sunshine.helpers.Weather;
 public class DetailActivityFragment extends Fragment {
     private final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private View rootView;
+    private WeatherHelper weatherHelper;
 
     public DetailActivityFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        weatherHelper = new WeatherHelper(getActivity());
         return inflater.inflate(R.layout.fragment_detail, container, false);
     }
 
@@ -53,7 +55,7 @@ public class DetailActivityFragment extends Fragment {
 
             populateText(
                     R.id.detail_day,
-                    Weather.FriendlyDay(position)
+                    weatherHelper.FriendlyDay(position)
             );
 
             populateText(
@@ -63,12 +65,12 @@ public class DetailActivityFragment extends Fragment {
 
             populateText(
                     R.id.detail_high,
-                    String.format(getString(R.string.format_temperature), Math.round(forecast.getJSONObject("temp").getDouble("max")))
+                    String.format(getString(R.string.format_temperature), weatherHelper.convertTemperature(forecast.getJSONObject("temp").getDouble("max")))
             );
 
             populateText(
                     R.id.detail_low,
-                    String.format(getString(R.string.format_temperature), Math.round(forecast.getJSONObject("temp").getDouble("min")))
+                    String.format(getString(R.string.format_temperature), weatherHelper.convertTemperature(forecast.getJSONObject("temp").getDouble("min")))
             );
 
             populateText(
@@ -78,15 +80,15 @@ public class DetailActivityFragment extends Fragment {
 
             populateText(
                     R.id.detail_pressure,
-                    String.format(getString(R.string.format_pressure_metric), Math.round(forecast.getDouble("pressure")))
+                    String.format(getString(weatherHelper.isMetric() ? R.string.format_pressure_metric : R.string.format_pressure_imperial), Math.round(forecast.getDouble("pressure")))
             );
 
             int directionIndex = (int) Math.floor((forecast.getDouble("deg") + 22.5) / 45.0) % 8;
-            int windSpeed = (int) Math.round(forecast.getDouble("speed") * 3600 / 1000);
-            String windDirection = new String[]{"N","NE","E","SE","S","SW","W","NW"}[directionIndex];
+            String windDirection = getResources().getStringArray(R.array.directions)[directionIndex];
+
             populateText(
                     R.id.detail_wind,
-                    String.format(getString(R.string.format_wind_metric), windSpeed, windDirection)
+                    String.format(getString(weatherHelper.isMetric() ? R.string.format_wind_metric : R.string.format_wind_imperial), weatherHelper.convertSpeed(forecast.getDouble("speed")), windDirection)
             );
 
             populateText(
@@ -96,7 +98,7 @@ public class DetailActivityFragment extends Fragment {
 
             ImageView image = (ImageView) view.findViewById(R.id.detail_weather_image);
             image.setImageResource(getResources().getIdentifier(
-                    "art_" + Weather.GetDrawableSuffix(forecast.getJSONArray("weather").getJSONObject(0).getInt("id")),
+                    "art_" + weatherHelper.GetDrawableSuffix(forecast.getJSONArray("weather").getJSONObject(0).getInt("id")),
                     "drawable",
                     getActivity().getPackageName()));
 
